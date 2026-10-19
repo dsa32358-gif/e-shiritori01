@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>オンライン絵しりとり</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div id="app">
+    <!-- ヘッダー -->
+    <header class="app-header">
+      <h1>🎨 オンライン絵しりとり</h1>
+      <div id="room-badge" class="room-badge hidden">
+        ルーム: <span id="display-room-code">----</span>
+      </div>
+    </header>
+
+    <!-- 1. トップ/ロビー画面 -->
+    <section id="screen-lobby" class="screen active">
+      <div class="card center-card">
+        <h2>遊ぶ準備</h2>
+        
+        <div class="input-group">
+          <label for="player-name">あなたの名前</label>
+          <input type="text" id="player-name" placeholder="例: たろう" maxlength="10">
+        </div>
+
+        <div class="tab-buttons">
+          <button id="tab-create-btn" class="btn btn-tab active">ルームを作成</button>
+          <button id="tab-join-btn" class="btn btn-tab">ルームに参加</button>
+        </div>
+
+        <!-- ルーム作成パネル -->
+        <div id="panel-create" class="tab-panel active">
+          <div class="input-group">
+            <label for="input-rounds">周回数 (何周するか)</label>
+            <select id="input-rounds">
+              <option value="1">1周</option>
+              <option value="2" selected>2周</option>
+              <option value="3">3周</option>
+              <option value="4">4周</option>
+            </select>
+          </div>
+          <button id="btn-create-room" class="btn btn-primary btn-block">ルームを作成して待機</button>
+        </div>
+
+        <!-- ルーム参加パネル -->
+        <div id="panel-join" class="tab-panel">
+          <div class="input-group">
+            <label for="input-room-code">ルームコード (6桁)</label>
+            <input type="text" id="input-room-code" placeholder="例: 123456" maxlength="6" style="text-transform: uppercase;">
+          </div>
+          <button id="btn-join-room" class="btn btn-success btn-block">ルームに参加</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 待機室画面 -->
+    <section id="screen-waiting" class="screen">
+      <div class="card">
+        <h2>待機室</h2>
+        <div class="room-info-box">
+          <p>みんなにこのルームコードを共有してね！</p>
+          <div class="room-code-display" id="lobby-room-code">------</div>
+        </div>
+
+        <div class="players-section">
+          <h3>参加中のプレイヤー (<span id="player-count">0</span>人)</h3>
+          <ul id="player-list" class="player-list"></ul>
+        </div>
+
+        <div class="game-settings-info">
+          <p>設定: 全<span id="display-rounds">2</span>周 (<span id="total-turns-estimate">0</span>ターン)</p>
+        </div>
+
+        <div id="host-controls" class="host-controls hidden">
+          <button id="btn-start-game" class="btn btn-primary btn-block btn-lg">ゲームを開始する！</button>
+        </div>
+        <div id="guest-waiting-msg" class="waiting-msg">
+          ホストがゲームを開始するのを待っています...
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. ゲーム画面 -->
+    <section id="screen-game" class="screen">
+      <!-- 進行状況バー -->
+      <div class="progress-bar-container">
+        <div class="progress-info">
+          <span>ターン <span id="current-turn-num">1</span> / <span id="total-turns-num">0</span></span>
+          <span>現在の順番: <strong id="current-player-name">---</strong></span>
+        </div>
+      </div>
+
+      <!-- パネル: 自分の描き番 -->
+      <div id="panel-my-turn" class="game-panel hidden">
+        <div class="turn-header my-turn">
+          <h2>🎨 あなたの番です！絵を描いてください</h2>
+          <p class="hint-text">前の人の絵を見て、しりとりが繋がる絵を描きましょう。</p>
+        </div>
+
+        <!-- お絵かきキャンバス -->
+        <div class="canvas-container">
+          <canvas id="paint-canvas" width="400" height="400"></canvas>
+        </div>
+
+        <!-- ツールバー -->
+        <div class="canvas-tools">
+          <div class="tool-group">
+            <label>色:</label>
+            <input type="color" id="color-picker" value="#000000">
+            <button class="btn-color-preset" style="background:#000000" data-color="#000000"></button>
+            <button class="btn-color-preset" style="background:#ff0000" data-color="#ff0000"></button>
+            <button class="btn-color-preset" style="background:#0000ff" data-color="#0000ff"></button>
+            <button class="btn-color-preset" style="background:#008000" data-color="#008000"></button>
+            <button class="btn-color-preset" style="background:#ffa500" data-color="#ffa500"></button>
+          </div>
+          <div class="tool-group">
+            <label>太さ:</label>
+            <input type="range" id="brush-size" min="1" max="30" value="5">
+          </div>
+          <div class="tool-group">
+            <button id="btn-eraser" class="btn btn-sm">消しゴム</button>
+            <button id="btn-undo" class="btn btn-sm">1つ戻す</button>
+            <button id="btn-clear" class="btn btn-sm btn-danger">全消去</button>
+          </div>
+        </div>
+
+        <!-- 答え入力フォーム -->
+        <div class="card answer-card">
+          <div class="input-group">
+            <label for="input-answer">あなたが描いたものの名前 (他の人には見えません)</label>
+            <input type="text" id="input-answer" placeholder="例: りんご" maxlength="20">
+          </div>
+          <button id="btn-submit-turn" class="btn btn-success btn-block btn-lg">描き終えた！次の人へ送る ➔</button>
+        </div>
+      </div>
+
+      <!-- パネル: 他人のターン (待機中) -->
+      <div id="panel-others-turn" class="game-panel hidden">
+        <div class="turn-header others-turn">
+          <h2>⏳ <span id="active-player-name">---</span> さんが描いています...</h2>
+          <p>描き終わるまでお待ちください。</p>
+        </div>
+      </div>
+
+      <!-- 履歴タイムライン (描き手も待機手も見られる) -->
+      <div class="card timeline-card">
+        <h3>📜 これまでの流れ</h3>
+        <p class="timeline-subtext">※答えの文字は最後の答え合わせまで秘密です</p>
+        <div id="history-timeline" class="history-timeline">
+          <!-- 過去の描画履歴がここに読み込まれます -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 結果画面 (答え合わせ) -->
+    <section id="screen-result" class="screen">
+      <div class="card">
+        <div class="result-header">
+          <h2>🎉 答え合わせタイム！</h2>
+          <p>しりとりは最後まで繋がっているかな？</p>
+        </div>
+
+        <div id="result-list" class="result-list">
+          <!-- 結果リストが生成されます -->
+        </div>
+
+        <button id="btn-back-lobby" class="btn btn-primary btn-block btn-lg" style="margin-top: 20px;">トップに戻る</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- Firebase & App JS -->
+  <script type="module" src="script.js"></script>
+</body>
+</html>
