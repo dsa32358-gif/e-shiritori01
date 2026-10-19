@@ -6,12 +6,12 @@ import {
 
 // Firebase設定
 const firebaseConfig = {
-  apiKey: "AIzaSyDummyKeyForDemoPurposesOnly12345",
-  authDomain: "demo-app.firebaseapp.com",
-  projectId: "demo-app",
-  storageBucket: "demo-app.appspot.com",
-  messagingSenderId: "1234567890",
-  appId: "1:1234567890:web:abcdef123456"
+  apiKey: "AIzaSyDuOsSRngbakBN6wge3VHHOETbrUshkXUg",
+  authDomain: "picture-shiritori-19d70.firebaseapp.com",
+  projectId: "picture-shiritori-19d70",
+  storageBucket: "picture-shiritori-19d70.firebasestorage.app",
+  messagingSenderId: "346037243053",
+  appId: "1:346037243053:web:b99d5e7fb3c068325b4a24"
 };
 
 // Firebaseの初期化
